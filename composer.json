@@ -1,0 +1,26 @@
+{
+  "name": "dnsobchuk/framework",
+  "description": "PSR-7 framework",
+  "minimum-stability": "stable",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "dnsobchuk",
+      "email": "dnsobchuk@yandex.ru"
+    }
+  ],
+  "config": {
+    "sort-packages": true
+  },
+  "require": {
+    "php": ">= 8.*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Framework\\": "src/Framework"
+    }
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.5"
+  }
+}
