@@ -1,0 +1,18 @@
+version: "3.9"
+services:
+  framework-nginx:
+    build:
+      context: ./docker/development
+      dockerfile: nginx.docker
+    volumes:
+      - ./:/app
+    depends_on:
+      - framework-php-fpm
+    ports:
+      - "8080:80"
+  framework-php-fpm:
+    build:
+      context: ./docker/development
+      dockerfile: php-fpm.docker
+    volumes:
+      - ./:/app
