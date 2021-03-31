@@ -1,4 +1,4 @@
-init: docker-down docker-pull docker-build docker-up
+init: docker-down docker-pull docker-build docker-up framework-init
 up: docker-up
 down: docker-down
 restart: down up
@@ -17,3 +17,8 @@ docker-pull:
 
 docker-build:
 	docker-compose build
+
+framework-init: framework-composer-install
+
+framework-composer-install:
+	docker-compose run --rm framework-php-cli composer install --prefer-dist
