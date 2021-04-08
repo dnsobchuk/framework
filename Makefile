@@ -18,7 +18,10 @@ docker-pull:
 docker-build:
 	docker-compose build
 
-framework-init: framework-composer-install
+framework-init: framework-composer-install framework-test
 
 framework-composer-install:
 	docker-compose run --rm framework-php-cli composer install --prefer-dist
+
+framework-test:
+	docker-compose run --rm framework-php-cli composer test
