@@ -6,36 +6,50 @@ namespace Framework\Http;
 use Framework\Http\Router\Exception\RequestNotMatchedException;
 use Framework\Http\Router\RouteCollection;
 use Framework\Http\Router\Router;
+use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Diactoros\ServerRequest;
 use Laminas\Diactoros\Uri;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 class RouterTest extends TestCase
 {
     public function testCorrectMethod()
     {
         $routes = new RouteCollection();
-
-        $routes->get($nameGet = 'blog', '/blog', $handlerGet = 'handler_get');
-        $routes->post($namePost = 'blog_edit', '/blog', $handlerPost = 'handler_post');
+        $handler = function () {
+                return new JsonResponse([
+                    ['id' => 2, 'title' => 'The Second Post'],
+                    ['id' => 1, 'title' => 'The First Post']
+                ]);
+        };
+        $routes->get($nameGet = 'blog', '/blog', $handler);
+        $routes->post($namePost = 'blog_edit', '/blog', $handler);
 
         $router = new Router($routes);
 
         $result = $router->match($this->buildRequest('GET', '/blog'));
         self::assertEquals($nameGet, $result->getName());
-        self::assertEquals($handlerGet, $result->getHandler());
+        self::assertEquals($handler, $result->getHandler());
 
         $result = $router->match($this->buildRequest('POST', '/blog'));
         self::assertEquals($namePost, $result->getName());
-        self::assertEquals($handlerPost, $result->getHandler());
+        self::assertEquals($handler, $result->getHandler());
     }
 
     public function testMissingMethod()
     {
         $routes = new RouteCollection();
 
-        $routes->post('blog', '/blog', 'handler_request');
+        $handler = function () {
+                return new JsonResponse([
+                    ['id' => 2, 'title' => 'The Second Post'],
+                    ['id' => 1, 'title' => 'The First Post']
+                ]);
+        };
+
+        $routes->post('blog', '/blog', $handler);
 
         $router = new Router($routes);
 
@@ -47,7 +61,14 @@ class RouterTest extends TestCase
     {
         $routes = new RouteCollection();
 
-        $routes->get($name = 'blog_show', '/blog/{id}', 'handler', ['id' => '\d+']);
+        $handler = function (ServerRequestInterface $request) {
+            $id = $request->getAttributes()['id'];
+            if($id > 5) {
+                return new JsonResponse(['error', 'Undefined page'], 404);
+            }
+            return new JsonResponse(['id' => $id, 'title' => "Post #{$id}"]);
+        };
+        $routes->get($name = 'blog_show', '/blog/{id}', $handler, ['id' => '\d+']);
 
         $router = new Router($routes);
 
@@ -61,7 +82,15 @@ class RouterTest extends TestCase
     {
         $routes = new RouteCollection();
 
-        $routes->get($name = 'blog_show', '/blog/{id}', 'handler', ['id' => '\d+']);
+        $handler = function (ServerRequestInterface $request) {
+            $id = $request->getAttributes()['id'];
+            if($id > 5) {
+                return new JsonResponse(['error', 'Undefined page'], 404);
+            }
+            return new JsonResponse(['id' => $id, 'title' => "Post #{$id}"]);
+        };
+
+        $routes->get($name = 'blog_show', '/blog/{id}', $handler, ['id' => '\d+']);
 
         $router = new Router($routes);
 
@@ -72,9 +101,21 @@ class RouterTest extends TestCase
     public function testGenerate()
     {
         $routes = new RouteCollection();
-
-        $routes->get('blog', '/blog', 'handler');
-        $routes->get('blog_show', '/blog/{id}', 'handler', ['id' => '\d+']);
+        $handler = function () {
+                return new JsonResponse([
+                    ['id' => 2, 'title' => 'The Second Post'],
+                    ['id' => 1, 'title' => 'The First Post']
+                ]);
+        };
+        $handlerShow = function (ServerRequestInterface $request) {
+            $id = $request->getAttributes()['id'];
+            if($id > 5) {
+                return new JsonResponse(['error', 'Undefined page'], 404);
+            }
+            return new JsonResponse(['id' => $id, 'title' => "Post #{$id}"]);
+        };
+        $routes->get('blog', '/blog', $handler);
+        $routes->get('blog_show', '/blog/{id}', $handlerShow, ['id' => '\d+']);
 
         $router = new Router($routes);
 
@@ -85,8 +126,14 @@ class RouterTest extends TestCase
     public function testGenerateMissingAttributes()
     {
         $routes = new RouteCollection();
-
-        $routes->get($name = 'blog_show', '/blog/{id}', 'handler', ['id' => '\d+']);
+        $handler = function (ServerRequestInterface $request) {
+            $id = $request->getAttributes()['id'];
+            if($id > 5) {
+                return new JsonResponse(['error', 'Undefined page'], 404);
+            }
+            return new JsonResponse(['id' => $id, 'title' => "Post #{$id}"]);
+        };
+        $routes->get($name = 'blog_show', '/blog/{id}', $handler, ['id' => '\d+']);
 
         $router = new Router($routes);
 
