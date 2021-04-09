@@ -9,7 +9,7 @@ class Result
 
     public function __construct(
         private string $name,
-        private string $handler,
+        private \Closure $handler,
         private array $attributes
     ){}
 
@@ -18,7 +18,7 @@ class Result
         return $this->name;
     }
 
-    public function getHandler(): string
+    public function getHandler(): \Closure
     {
         return $this->handler;
     }
