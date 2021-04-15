@@ -11,7 +11,7 @@ class Route
     public function __construct(
         public string $name,
         public string $pattern,
-        public \Closure $handler,
+        public string $handler,
         public array $methods,
         public array $tokens = []
     ) {}

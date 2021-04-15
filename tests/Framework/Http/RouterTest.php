@@ -3,27 +3,22 @@
 
 namespace Framework\Http;
 
+use App\Http\Action\Blog\IndexAction;
+use App\Http\Action\Blog\ShowAction;
 use Framework\Http\Router\Exception\RequestNotMatchedException;
 use Framework\Http\Router\RouteCollection;
 use Framework\Http\Router\Router;
-use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Diactoros\ServerRequest;
 use Laminas\Diactoros\Uri;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ServerRequestInterface;
 
 class RouterTest extends TestCase
 {
     public function testCorrectMethod()
     {
         $routes = new RouteCollection();
-        $handler = function () {
-                return new JsonResponse([
-                    ['id' => 2, 'title' => 'The Second Post'],
-                    ['id' => 1, 'title' => 'The First Post']
-                ]);
-        };
+        $handler = IndexAction::class;
         $routes->get($nameGet = 'blog', '/blog', $handler);
         $routes->post($namePost = 'blog_edit', '/blog', $handler);
 
@@ -42,12 +37,7 @@ class RouterTest extends TestCase
     {
         $routes = new RouteCollection();
 
-        $handler = function () {
-                return new JsonResponse([
-                    ['id' => 2, 'title' => 'The Second Post'],
-                    ['id' => 1, 'title' => 'The First Post']
-                ]);
-        };
+        $handler = IndexAction::class;
 
         $routes->post('blog', '/blog', $handler);
 
@@ -61,13 +51,7 @@ class RouterTest extends TestCase
     {
         $routes = new RouteCollection();
 
-        $handler = function (ServerRequestInterface $request) {
-            $id = $request->getAttributes()['id'];
-            if($id > 5) {
-                return new JsonResponse(['error', 'Undefined page'], 404);
-            }
-            return new JsonResponse(['id' => $id, 'title' => "Post #{$id}"]);
-        };
+        $handler = ShowAction::class;
         $routes->get($name = 'blog_show', '/blog/{id}', $handler, ['id' => '\d+']);
 
         $router = new Router($routes);
@@ -82,13 +66,7 @@ class RouterTest extends TestCase
     {
         $routes = new RouteCollection();
 
-        $handler = function (ServerRequestInterface $request) {
-            $id = $request->getAttributes()['id'];
-            if($id > 5) {
-                return new JsonResponse(['error', 'Undefined page'], 404);
-            }
-            return new JsonResponse(['id' => $id, 'title' => "Post #{$id}"]);
-        };
+        $handler = ShowAction::class;
 
         $routes->get($name = 'blog_show', '/blog/{id}', $handler, ['id' => '\d+']);
 
@@ -101,19 +79,8 @@ class RouterTest extends TestCase
     public function testGenerate()
     {
         $routes = new RouteCollection();
-        $handler = function () {
-                return new JsonResponse([
-                    ['id' => 2, 'title' => 'The Second Post'],
-                    ['id' => 1, 'title' => 'The First Post']
-                ]);
-        };
-        $handlerShow = function (ServerRequestInterface $request) {
-            $id = $request->getAttributes()['id'];
-            if($id > 5) {
-                return new JsonResponse(['error', 'Undefined page'], 404);
-            }
-            return new JsonResponse(['id' => $id, 'title' => "Post #{$id}"]);
-        };
+        $handler = IndexAction::class;
+        $handlerShow = ShowAction::class;
         $routes->get('blog', '/blog', $handler);
         $routes->get('blog_show', '/blog/{id}', $handlerShow, ['id' => '\d+']);
 
@@ -126,13 +93,7 @@ class RouterTest extends TestCase
     public function testGenerateMissingAttributes()
     {
         $routes = new RouteCollection();
-        $handler = function (ServerRequestInterface $request) {
-            $id = $request->getAttributes()['id'];
-            if($id > 5) {
-                return new JsonResponse(['error', 'Undefined page'], 404);
-            }
-            return new JsonResponse(['id' => $id, 'title' => "Post #{$id}"]);
-        };
+        $handler = ShowAction::class;
         $routes->get($name = 'blog_show', '/blog/{id}', $handler, ['id' => '\d+']);
 
         $router = new Router($routes);
