@@ -16,6 +16,7 @@ class IndexActionTest extends TestCase
             ['id' => 2, 'title' => 'The Second Post'],
             ['id' => 1, 'title' => 'The First Post']
         ]);
-        self::assertEquals($testData, $response->getBody()->getContents());
+        self::assertEquals(200, $response->getStatusCode());
+        self::assertJsonStringEqualsJsonString($testData, $response->getBody()->getContents());
     }
 }
