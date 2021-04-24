@@ -4,24 +4,26 @@
 namespace App\Http\Pipeline;
 
 
+use JetBrains\PhpStorm\Pure;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 class Pipeline
 {
-    private array $middleware = [];
+    private \SplQueue $queue;
+
+    #[Pure] public function __construct(){
+        $this->queue = new \SplQueue();
+    }
+
+    public function __invoke(ServerRequestInterface $request, callable $next): ResponseInterface
+    {
+        $delegate = new Next(clone $this->queue, $next);
+        return $delegate($request);
+    }
 
     public function pipe(callable $middleware): void
     {
-        $this->middleware[] = $middleware;
-    }
-
-    public function __invoke(ServerRequestInterface $request, callable $default): ResponseInterface
-    {
-        $current = array_shift($this->middleware);
-
-        return $current($request, function (ServerRequestInterface $request) use ($default) {
-            return $this($request, $default);
-        });
+        $this->queue->enqueue($middleware);
     }
 }

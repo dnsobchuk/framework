@@ -5,20 +5,23 @@ namespace Framework\Http\Router;
 
 class Result
 {
-    public string $anotherField;
+    private string $name;
+    private array $attributes;
+    private mixed $handler;
 
-    public function __construct(
-        private string $name,
-        private string $handler,
-        private array $attributes
-    ){}
+
+    public function __construct(string $name, mixed $handler, array $attributes){
+        $this->name = $name;
+        $this->attributes = $attributes;
+        $this->handler = $handler;
+    }
 
     public function getName(): string
     {
         return $this->name;
     }
 
-    public function getHandler(): string
+    public function getHandler(): mixed
     {
         return $this->handler;
     }
