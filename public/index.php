@@ -35,7 +35,7 @@ $routes->get('blog_show', '/blog/{id}', Action\Blog\ShowAction::class)->tokens([
 $router = new AuraRouterAdapter($aura);
 $app = new Application(new MiddlewareResolver(), new Middleware\NotFoundHandler());
 $app->pipe(Middleware\ProfilerMiddleware::class);
-
+$app->pipe(Middleware\CredentialMiddleware::class);
 ### Running
 
 $request = ServerRequestFactory::fromGlobals();
@@ -49,10 +49,6 @@ try {
 } catch (RequestNotMatchedException $e) {}
 
 $response = $app->run($request);
-
-### Postprocessing
-
-$response = $response->withHeader('X-Developer', 'dnsobchuk');
 
 ### Sending
 
