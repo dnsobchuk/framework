@@ -1,8 +1,8 @@
 <?php
 
+use App\Http\Application;
 use App\Http\Action;
 use App\Http\Middleware;
-use App\Http\Pipeline\Pipeline;
 use Aura\Router\RouterContainer;
 use Framework\Http\MiddlewareResolver;
 use Framework\Http\Router\AuraRouterAdapter;
@@ -33,9 +33,8 @@ $routes->get('blog', '/blog', Action\Blog\IndexAction::class);
 $routes->get('blog_show', '/blog/{id}', Action\Blog\ShowAction::class)->tokens(['id' => '\d+']);
 
 $router = new AuraRouterAdapter($aura);
-$resolver = new MiddlewareResolver();
-$pipeline = new Pipeline();
-$pipeline->pipe($resolver->resolve(Middleware\ProfilerMiddleware::class));
+$app = new Application(new MiddlewareResolver(), new Middleware\NotFoundHandler());
+$app->pipe(Middleware\ProfilerMiddleware::class);
 
 ### Running
 
@@ -46,12 +45,10 @@ try {
     foreach ($result->getAttributes() as $attribute => $value) {
         $request = $request->withAttribute($attribute, $value);
     }
-    $handler = $result->getHandler();
-    $middleware = $resolver->resolve($handler);
-    $pipeline->pipe($middleware);
+    $app->pipe($result->getHandler());
 } catch (RequestNotMatchedException $e) {}
 
-$response = $pipeline($request, new Middleware\NotFoundHandler());
+$response = $app->run($request);
 
 ### Postprocessing
 
