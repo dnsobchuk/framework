@@ -34,6 +34,7 @@ $routes->get('blog_show', '/blog/{id}', Action\Blog\ShowAction::class)->tokens([
 
 $router = new AuraRouterAdapter($aura);
 $app = new Application(new MiddlewareResolver(), new Middleware\NotFoundHandler());
+$app->pipe(Middleware\ErrorHandlerMiddleware::class);
 $app->pipe(Middleware\ProfilerMiddleware::class);
 $app->pipe(Middleware\CredentialMiddleware::class);
 ### Running
@@ -49,6 +50,7 @@ try {
 } catch (RequestNotMatchedException $e) {}
 
 $response = $app->run($request);
+
 
 ### Sending
 
